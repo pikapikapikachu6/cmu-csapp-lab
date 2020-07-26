@@ -332,8 +332,8 @@ unsigned floatScale2(unsigned uf) {
  */
 int floatFloat2Int(unsigned uf) {
         int mask = uf >> 31;
-        int exponent = ((0x7f800000 & mask) >> 23) - 127;
-        int fraction = (0x007FFFFF & mask) | 0x00800000;
+        int exponent = ((0x7f800000 & uf) >> 23) - 127;
+        int fraction = (0x007FFFFF & uf) | 0x00800000;
         if ((!(uf & 0x7FFFFFFF)) || (exponent < 0)) {
                 return 0;
         }
@@ -367,5 +367,12 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+        int exponent = x + 127;
+        if (exponent <= 0) {
+                return 0;
+        } 
+        if (exponent >= 255) {
+                return 0xff << 23;
+        }
+        return exponent << 23;
 }
