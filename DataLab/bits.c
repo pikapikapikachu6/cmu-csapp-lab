@@ -143,7 +143,8 @@ NOTES:
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+        // Not all 0 Not all 1
+        return ~(~x & ~y) & ~(x & y);
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -152,9 +153,8 @@ int bitXor(int x, int y) {
  *   Rating: 1
  */
 int tmin(void) {
-
-  return 2;
-
+        // min: 0x1000..000
+        return (0x1 << 31);
 }
 //2
 /*
@@ -165,7 +165,18 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
-  return 2;
+        // max: 0x0111..11
+        // 1000..0
+        int num = x + 1;
+        // 1111..1
+        x = x + num;
+        // 0000..0
+        x = ~x;
+        // 0111..1
+        num = !num;
+        // 0111..1
+        x = x + num;
+        return !x;
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -176,7 +187,9 @@ int isTmax(int x) {
  *   Rating: 2
  */
 int allOddBits(int x) {
-  return 2;
+        int mask = 0xAAAA;
+        mask = mask + (mask << 16);
+        return !((mask & x) ^ mask);
 }
 /* 
  * negate - return -x 
@@ -186,7 +199,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+        return ~x + 1;
 }
 //3
 /* 
@@ -199,7 +212,13 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+        // 0 - 9 ASCII: 0X30H - 0X39
+        int sign = 1 << 31;
+        int upper = ~(sign | 0x39);
+        int lower = ~0x30;
+        upper = sign & (upper + x) >> 31;
+        lower = sign & (lower + 1 + x) >> 31;
+        return (!(upper | lower));
 }
 /* 
  * conditional - same as x ? y : z 
@@ -209,7 +228,9 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+        x = !!x;
+        x = ~x + 1;
+        return (x & y) | (~x & z);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -219,7 +240,15 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+        int mask = ~x + 1;
+        int sub = mask + y;
+        int checksub = sub >> 31 & 1;
+        int bit = 1 << 31;
+        int maskx = x & bit;
+        int masky = y & bit;
+        int same = maskx ^ masky;
+        same = same >> 31 & 1;
+        return ((!checksub) & (!same)) | (same & (maskx >> 31));
 }
 //4
 /* 
@@ -231,7 +260,7 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  return 2;
+        return (((x|(~x + 1)) >> 31) + 1);
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -246,7 +275,20 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+        int mask = x >> 31;
+        x = (~x & mask) | (x & ~mask);
+        int b1 = !!(x >> 16) << 4;
+        x = x >> b1;
+        int b2 = !!(x >> 8) << 3;
+        x = x >> b2;
+        int b3 = !!(x >> 4) << 2;
+        x = x >> b3;
+        int b4 = !!(x >> 2) << 1;
+        x = x >> b4;
+        int b5 = !!(x >> 1);
+        x = x >> b5;
+        int b6 = x;
+        return b1+b2+b3+b4+b5+b6+1;
 }
 //float
 /* 
