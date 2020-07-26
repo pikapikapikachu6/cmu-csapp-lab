@@ -1,140 +1,89 @@
-***********************
-The CS:APP Data Lab
-Directions to Students
-***********************
+DataLab 笔记
 
-Your goal is to modify your copy of bits.c so that it passes all the
-tests in btest without violating any of the coding guidelines.
+更加理解位运算的作用
+借鉴了部分资料
 
+function 1:
+int bitXor(int x, int y);
+task: 实现异或操作
+x ⊕ y = (¬x ∧ y) ∨ (x ∧¬y)
+利用布尔运算：
+x ⊕ y = ¬(¬(a ∧ ¬b)) ∧ (¬(¬a ∧ b))
 
-*********
-0. Files:
-*********
+function 2:
+int tmin(void);
+task: 位运算获得最小补码
+min: 0x1000..000
+符号位为1, 其余位为0
 
-Makefile	- Makes btest, fshow, and ishow
-README		- This file
-bits.c		- The file you will be modifying and handing in
-bits.h		- Header file
-btest.c		- The main btest program
-  btest.h	- Used to build btest
-  decl.c	- Used to build btest
-  tests.c       - Used to build btest
-  tests-header.c- Used to build btest
-dlc*		- Rule checking compiler binary (data lab compiler)	 
-driver.pl*	- Driver program that uses btest and dlc to autograde bits.c
-Driverhdrs.pm   - Header file for optional "Beat the Prof" contest
-fshow.c		- Utility for examining floating-point representations
-ishow.c		- Utility for examining integer representations
+function 3:
+int isTmax(int x);
+task: 位运算判断是否为最大补码
+max: 0x0111..11
+排除情况：-1的补码 和 0xFFFFFFFF
 
-***********************************************************
-1. Modifying bits.c and checking it for compliance with dlc
-***********************************************************
+function 4:
+int allOddBits(int x);
+task: 判断所有奇数位是否均为1
+构造掩码
+0xAAAAAAAA = 1010 1010 1010 1010 1010 1010 1010 1010
 
-IMPORTANT: Carefully read the instructions in the bits.c file before
-you start. These give the coding rules that you will need to follow if
-you want full credit.
+function 5:
+int negate(int x);
+task: 求-x
+各位取反, 末尾加1
 
-Use the dlc compiler (./dlc) to automatically check your version of
-bits.c for compliance with the coding guidelines:
+function 6:
+int isAsciiDigit(int x);
+task: 判断是否为数字0 - 9
+ASCII: 0 - 9 0x30 - 0x39
++ 0x39 -> negative
+- 0x30 -> negative
 
-       unix> ./dlc bits.c
+function 7:
+int conditional(int x, int y, int z);
+task: 位运算实现x ? y : z 
+判断x各位数字 
+x == 0 -> 0
+x != 0 -> 1
+补码: 各位取反, 末尾加1
 
-dlc returns silently if there are no problems with your code.
-Otherwise it prints messages that flag any problems.  Running dlc with
-the -e switch:
+function 8:
+int isLessOrEqual(int x, int y);
+task: if x <= y  then return 1, else return 0
+情况一: 符号相同 判断差值
+情况二：符号不用 正数大
 
-    	unix> ./dlc -e bits.c  
+function 9:
+int logicalNeg(int x);
+task: 位运算实现非
+利用补码性质
 
-causes dlc to print counts of the number of operators used by each function.
+function 10:
+int howManyBits(int x);
+task: 补码位数
+情况一: 正数 最高位1 + 1
+情况二：负数 最高位0 + 1
 
-Once you have a legal solution, you can test it for correctness using
-the ./btest program.
+function 11；
+unsigned floatScale2(unsigned uf);
+task: 2*f
+考虑特殊情况：
+0, 正负无穷, NaN
+非规格化小数或0时，处理小数部分
+NaN或INF时-> uf
 
-*********************
-2. Testing with btest
-*********************
+function 12:
+int floatFloat2Int(unsigned uf);
+task: 浮点数转换为整数
+如果原浮点值为0 -> 0
+如果真实指数大于31 -> 0x80000000u；
+如果exponent < 0 -> 0。
+剩下的情况：首先把小数部分（23位）转化为整数（和23比较），然后判断是否溢出：如果和原符号相同则直接返回，否则如果结果为负（原来为正）则溢出返回越界指定值0x80000000u，否则原来为负，结果为正，则需要返回其补码（相反数）
 
-The Makefile in this directory compiles your version of bits.c with
-additional code to create a program (or test harness) named btest.
-
-To compile and run the btest program, type:
-
-    unix> make btest
-    unix> ./btest [optional cmd line args]
-
-You will need to recompile btest each time you change your bits.c
-program. When moving from one platform to another, you will want to
-get rid of the old version of btest and generate a new one.  Use the
-commands:
-
-    unix> make clean
-    unix> make btest
-
-Btest tests your code for correctness by running millions of test
-cases on each function.  It tests wide swaths around well known corner
-cases such as Tmin and zero for integer puzzles, and zero, inf, and
-the boundary between denormalized and normalized numbers for floating
-point puzzles. When btest detects an error in one of your functions,
-it prints out the test that failed, the incorrect result, and the
-expected result, and then terminates the testing for that function.
-
-Here are the command line options for btest:
-
-  unix> ./btest -h
-  Usage: ./btest [-hg] [-r <n>] [-f <name> [-1|-2|-3 <val>]*] [-T <time limit>]
-    -1 <val>  Specify first function argument
-    -2 <val>  Specify second function argument
-    -3 <val>  Specify third function argument
-    -f <name> Test only the named function
-    -g        Format output for autograding with no error messages
-    -h        Print this message
-    -r <n>    Give uniform weight of n for all problems
-    -T <lim>  Set timeout limit to lim
-
-Examples:
-
-  Test all functions for correctness and print out error messages:
-  unix> ./btest
-
-  Test all functions in a compact form with no error messages:
-  unix> ./btest -g
-
-  Test function foo for correctness:
-  unix> ./btest -f foo
-
-  Test function foo for correctness with specific arguments:
-  unix> ./btest -f foo -1 27 -2 0xf
-
-Btest does not check your code for compliance with the coding
-guidelines.  Use dlc to do that.
-
-*******************
-3. Helper Programs
-*******************
-
-We have included the ishow and fshow programs to help you decipher
-integer and floating point representations respectively. Each takes a
-single decimal or hex number as an argument. To build them type:
-
-    unix> make
-
-Example usages:
-
-    unix> ./ishow 0x27
-    Hex = 0x00000027,	Signed = 39,	Unsigned = 39
-
-    unix> ./ishow 27
-    Hex = 0x0000001b,	Signed = 27,	Unsigned = 27
-
-    unix> ./fshow 0x15213243
-    Floating point value 3.255334057e-26
-    Bit Representation 0x15213243, sign = 0, exponent = 0x2a, fraction = 0x213243
-    Normalized.  +1.2593463659 X 2^(-85)
-
-    linux> ./fshow 15213243
-    Floating point value 2.131829405e-38
-    Bit Representation 0x00e822bb, sign = 0, exponent = 0x01, fraction = 0x6822bb
-    Normalized.  +1.8135598898 X 2^(-126)
-
+function 13:
+unsigned floatPower2(int x);
+task: 2.0^x
+暂时未写出 报错
 
 
