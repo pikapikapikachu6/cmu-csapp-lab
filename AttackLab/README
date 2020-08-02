@@ -1,1 +1,29 @@
+Attack Lab 笔记
+
+phases 1：
+得到汇编代码：
+objdump -d ctarget > ctarget.d 
+
+task：从test 跳转到 touch1
+0000000000401968 <test>
+00000000004017c0 <touch1>
+
+方法：覆盖地址
+“4017a8:	48 83 ec 28          	sub    $0x28,%rsp”
+gitbuf中申请了40个字节 起始位置为%rsp4
+所以创建新文件level1.txt 41-48位置填充touch1地址即可 (小端方式)
+
+
+phases 2：
+task: 把cookie值存储到%edi中，然后跳转到touch2
+cookie: 0x59b997fa
+00000000004017ec <touch2>
+
+方法:
+1. 填入cookie值 -> 设置跳转地址 -> 进行跳转 (level2.s)
+2. 将level2.s 转换为机器代码
+   gcc -c level2.s
+   objdump -d level2.o  > level2.d 
+   (objdump 命令是Linux下的反汇编目标文件或者可执行文件的命令，它以一种可阅读的格式让你更多地了解二进制文件可能带有的附加信息)
+3. 
 
