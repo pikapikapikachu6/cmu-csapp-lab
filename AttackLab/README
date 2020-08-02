@@ -25,5 +25,16 @@ cookie: 0x59b997fa
    gcc -c level2.s
    objdump -d level2.o  > level2.d 
    (objdump 命令是Linux下的反汇编目标文件或者可执行文件的命令，它以一种可阅读的格式让你更多地了解二进制文件可能带有的附加信息)
-3. 
+3. 利用机器代码修改地址 (level2.txt)
+   开头为level2的机器代码 最后为touch2地址
+
+phases3:
+task: 类似phases2 区别:字符串可能会被hexmatch覆盖
+00000000004018fa <touch3>
+
+方法：
+将字符串放置在远离栈顶的位置即可
+与phases2类似
+
+
 
